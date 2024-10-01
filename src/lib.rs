@@ -44,6 +44,10 @@ where
         self.inner.as_mut()?.get_mut(k)
     }
 
+    pub fn get_key_value(&self, k: &K) -> Option<(&K, &V)> {
+        self.inner.as_ref()?.get_key_value(k)
+    }
+
     pub fn contains_key(&self, k: &K) -> bool {
         self.inner
             .as_ref()
@@ -80,6 +84,10 @@ impl<K, V, S> LinkedHashMap<K, V, S> {
 
     pub(crate) fn inner(&self) -> Option<&InnerLinkedHashMap<K, V, S>> {
         self.inner.as_ref()
+    }
+
+    pub(crate) fn inner_mut(&mut self) -> Option<&mut InnerLinkedHashMap<K, V, S>> {
+        self.inner.as_mut()
     }
 
     pub(crate) fn inner_owned(self) -> Option<InnerLinkedHashMap<K, V, S>> {

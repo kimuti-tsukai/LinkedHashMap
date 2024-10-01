@@ -52,6 +52,7 @@ where
         let k = self.next_key?;
         let LinkedValue {
             value: v,
+            key,
             prev: _,
             next,
         } = self.table.get_raw(k).unwrap();
@@ -60,7 +61,7 @@ where
             self.next_key = Some(next_key.as_ref())
         }
 
-        Some((k, v))
+        Some((key.as_ref(), v))
     }
 }
 
@@ -113,6 +114,7 @@ where
         let k = self.next_key.as_ref()?;
         let LinkedValue {
             value: v,
+            key: _,
             prev: _,
             next,
         } = self.table.remove_raw(k).unwrap();
@@ -123,9 +125,30 @@ where
             unreachable!();
         };
 
-        let k =
-            std::mem::replace(&mut self.next_key, Some(next_key)).unwrap();
+        let k = std::mem::replace(&mut self.next_key, Some(next_key)).unwrap();
 
         Some((Rc::into_inner(k).unwrap(), v))
     }
 }
+
+// struct InnerIterMut<'a, K, V, S> {
+//     table: &'a mut InnerLinkedHashMap<K, V, S>,
+//     next_key: Option<&'a K>,
+// }
+
+// impl<'a, K, V, S> Iterator for InnerIterMut<'a, K, V, S>
+// where
+//     K: Eq + Hash,
+//     S: BuildHasher,
+// {
+//     type Item = (&'a K, &'a mut V);
+
+//     fn next(&mut self) -> Option<Self::Item> {
+//         let next_key = self.next_key?;
+//         let value = self.table.get_raw_mut(&next_key)?;
+
+//         self.next_key = value.next.as_deref();
+
+//         Some((&value.key, &mut value.value))
+//     }
+// }

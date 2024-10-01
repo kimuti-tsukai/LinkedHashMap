@@ -23,6 +23,7 @@ impl<K: Hash + Eq, V, S: BuildHasher + Default> InnerLinkedHashMap<K, V, S> {
             Rc::clone(&k),
             LinkedValue {
                 value: v,
+                key: Rc::clone(&k),
                 prev: None,
                 next: None,
             },
@@ -74,6 +75,16 @@ where
         Some(&mut self.table.get_mut(k)?.value)
     }
 
+    pub(crate) fn get_raw_mut(&mut self, k: &K) -> Option<&mut LinkedValue<K, V>> {
+        self.table.get_mut(k)
+    }
+
+    pub(crate) fn get_key_value(&self, k: &K) -> Option<(&K, &V)> {
+        let (k, v) = self.table.get_key_value(k)?;
+
+        Some((k.as_ref(), &v.value))
+    }
+
     pub(crate) fn contains_key(&self, k: &K) -> bool {
         self.table.contains_key(k)
     }
@@ -88,6 +99,7 @@ where
                 Rc::clone(&k),
                 LinkedValue {
                     value: v,
+                    key: Rc::clone(&k),
                     prev: Some(Rc::clone(&self.now_key)),
                     next: None
                 }
@@ -102,7 +114,7 @@ where
     }
 
     pub(crate) fn remove(&mut self, k: &K) -> Result<Option<V>, ()> {
-        let Some(LinkedValue { value, prev, next }) = self.table.remove(k) else {
+        let Some(LinkedValue { value, key: _, prev, next }) = self.table.remove(k) else {
             return Ok(None);
         };
 
